@@ -1,0 +1,14 @@
+name = "sentinel_ledger"
+description = ""
+version = "0.1.0-dev"
+
+authors = ["Bharath Sampadi"]
+maintainers = ["Bharath Sampadi <example@example.com>"]
+licenses = "MIT OR Apache-2.0 WITH LLVM-exception"
+website = ""
+tags = []
+
+executables = ["sentinel_ledger"]
+
+[[depends-on]]
+gnatprove = "^16.1.0"

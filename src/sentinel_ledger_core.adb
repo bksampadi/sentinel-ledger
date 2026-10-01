@@ -3,12 +3,25 @@ package body Sentinel_Ledger_Core
 is
 
    procedure Apply_Event
-     (State : in out System_State;
-      Event : Event_Record)
+     (State  : in out System_State;
+      Event  : Event_Record;
+      Result : out Apply_Result)
    is
    begin
-      State.Sequence := State.Sequence + 1;
-      State.Seen (Event.Id) := True;
+      if State.Sequence = Sequence_Number'Last then
+         Result := Capacity_Reached;
+
+      elsif State.Seen (Event.Id) then
+         Result := Duplicate;
+
+      elsif Event.Expected_Sequence /= State.Sequence + 1 then
+         Result := Out_Of_Order;
+
+      else
+         State.Sequence := State.Sequence + 1;
+         State.Seen (Event.Id) := True;
+         Result := Applied;
+      end if;
    end Apply_Event;
 
 end Sentinel_Ledger_Core;

@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build and prove
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install Alire
+        uses: alire-project/alr-install@v2
+        with:
+          crates: gnat_native gprbuild
+
+      - name: Build
+        run: alr build
+
+      - name: Run smoke test
+        run: alr run
+
+      - name: Prove SPARK contracts
+        run: alr gnatprove --mode=prove --level=2 --report=all

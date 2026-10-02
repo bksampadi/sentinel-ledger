@@ -41,5 +41,8 @@ jobs:
       - name: Run smoke test
         run: alr run
 
+      - name: Show proof tool version
+        run: alr gnatprove --version
+
       - name: Prove SPARK contracts
-        run: alr gnatprove --mode=prove --level=2 --report=all
+        run: alr gnatprove --mode=prove --level=2 --report=all --no-subprojects

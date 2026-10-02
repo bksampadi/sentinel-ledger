@@ -1,6 +1,10 @@
+with SHA3;
+
 package Sentinel_Ledger_Core
   with SPARK_Mode => On
 is
+   use type SHA3.Byte_Array;
+
    Max_Events : constant := 256;
 
    subtype Event_Id is Positive range 1 .. Max_Events;
@@ -8,9 +12,14 @@ is
 
    type Seen_Array is array (Event_Id) of Boolean;
 
+   subtype Chain_Digest is SHA3.Byte_Array_32;
+
+   Zero_Digest : constant Chain_Digest := [others => 0];
+
    type System_State is record
       Sequence : Sequence_Number := 0;
       Seen     : Seen_Array := [others => False];
+      Digest   : Chain_Digest := Zero_Digest;
    end record;
 
    type Event_Record is record
@@ -23,6 +32,12 @@ is
       Duplicate,
       Out_Of_Order,
       Capacity_Reached);
+
+   function Chain_Digest_For
+     (Previous : Chain_Digest;
+      Event    : Event_Record) return Chain_Digest
+   with
+     Global => null;
 
    procedure Apply_Event
      (State  : in out System_State;
@@ -50,6 +65,9 @@ is
           and then State.Sequence = State'Old.Sequence + 1
           and then
             State.Seen =
-              (State.Seen'Old with delta Event.Id => True));
+              (State.Seen'Old with delta Event.Id => True)
+          and then
+            State.Digest =
+              Chain_Digest_For (State'Old.Digest, Event));
 
 end Sentinel_Ledger_Core;

@@ -12,3 +12,6 @@ executables = ["sentinel_ledger"]
 
 [[depends-on]]
 gnatprove = "^16.1.0"
+
+[[depends-on]]
+sha3 = "^1.0.0"

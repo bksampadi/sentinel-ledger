@@ -1,4 +1,5 @@
 with "config/sentinel_ledger_config.gpr";
+with "sha3_ada.gpr";
 
 project Sentinel_Ledger is
 

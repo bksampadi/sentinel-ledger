@@ -14,6 +14,8 @@ is
 
    subtype Chain_Digest is SHA3.Byte_Array_32;
 
+   subtype Payload_Digest is SHA3.Byte_Array_32;
+
    Zero_Digest : constant Chain_Digest := [others => 0];
 
    type System_State is record
@@ -25,6 +27,7 @@ is
    type Event_Record is record
       Id                : Event_Id;
       Expected_Sequence : Sequence_Number;
+      Payload           : Payload_Digest;
    end record;
 
    type Apply_Result is

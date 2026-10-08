@@ -6,7 +6,7 @@ is
      (Previous : Chain_Digest;
       Event    : Event_Record) return Chain_Digest
    is
-      Data   : SHA3.Byte_Array (0 .. 36) := [others => 0];
+      Data   : SHA3.Byte_Array (0 .. 68) := [others => 0];
       Digest : Chain_Digest;
    begin
       --  Domain separator for Sentinel Ledger chain entries.
@@ -22,6 +22,9 @@ is
       --  Expected sequence encoded as unsigned big-endian 16-bit value.
       Data (35) := SHA3.U8 (Event.Expected_Sequence / 256);
       Data (36) := SHA3.U8 (Event.Expected_Sequence mod 256);
+
+      --  Commit to the action payload digest.
+      Data (37 .. 68) := Event.Payload;
 
       SHA3.SHA3_256 (Data, Digest);
 

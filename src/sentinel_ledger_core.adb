@@ -3,8 +3,7 @@ package body Sentinel_Ledger_Core
 is
 
    function Chain_Digest_For
-     (Previous : Chain_Digest;
-      Event    : Event_Record) return Chain_Digest
+     (Previous : Chain_Digest; Event : Event_Record) return Chain_Digest
    is
       Data   : SHA3.Byte_Array (0 .. 68) := [others => 0];
       Digest : Chain_Digest;
@@ -34,8 +33,7 @@ is
    procedure Apply_Event
      (State  : in out System_State;
       Event  : Event_Record;
-      Result : out Apply_Result)
-   is
+      Result : out Apply_Result) is
    begin
       if State.Sequence = Sequence_Number'Last then
          Result := Capacity_Reached;
@@ -48,9 +46,9 @@ is
 
       else
          State.Digest :=
-           Chain_Digest_For
-             (Previous => State.Digest,
-              Event    => Event);
+           Chain_Digest_For (Previous => State.Digest, Event => Event);
+
+         State.History (History_Index (State.Sequence + 1)) := Event;
 
          State.Sequence := State.Sequence + 1;
          State.Seen (Event.Id) := True;

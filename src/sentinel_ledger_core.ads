@@ -18,29 +18,31 @@ is
 
    Zero_Digest : constant Chain_Digest := [others => 0];
 
-   type System_State is record
-      Sequence : Sequence_Number := 0;
-      Seen     : Seen_Array := [others => False];
-      Digest   : Chain_Digest := Zero_Digest;
-   end record;
-
    type Event_Record is record
       Id                : Event_Id;
       Expected_Sequence : Sequence_Number;
       Payload           : Payload_Digest;
    end record;
 
-   type Apply_Result is
-     (Applied,
-      Duplicate,
-      Out_Of_Order,
-      Capacity_Reached);
+   Empty_Event : constant Event_Record :=
+     (Id => 1, Expected_Sequence => 0, Payload => [others => 0]);
+
+   subtype History_Index is Positive range 1 .. Max_Events;
+
+   type History_Array is array (History_Index) of Event_Record;
+
+   type System_State is record
+      Sequence : Sequence_Number := 0;
+      Seen     : Seen_Array := [others => False];
+      Digest   : Chain_Digest := Zero_Digest;
+      History  : History_Array := [others => Empty_Event];
+   end record;
+
+   type Apply_Result is (Applied, Duplicate, Out_Of_Order, Capacity_Reached);
 
    function Chain_Digest_For
-     (Previous : Chain_Digest;
-      Event    : Event_Record) return Chain_Digest
-   with
-     Global => null;
+     (Previous : Chain_Digest; Event : Event_Record) return Chain_Digest
+   with Global => null;
 
    procedure Apply_Event
      (State  : in out System_State;
@@ -48,29 +50,25 @@ is
       Result : out Apply_Result)
    with
      Contract_Cases =>
-       (State.Sequence = Sequence_Number'Last =>
-          Result = Capacity_Reached
-          and then State = State'Old,
+       (State.Sequence = Sequence_Number'Last                                =>
+          Result = Capacity_Reached and then State = State'Old,
 
-        State.Sequence < Sequence_Number'Last
-        and then State.Seen (Event.Id) =>
-          Result = Duplicate
-          and then State = State'Old,
+        State.Sequence < Sequence_Number'Last and then State.Seen (Event.Id) =>
+          Result = Duplicate and then State = State'Old,
 
         State.Sequence < Sequence_Number'Last
         and then not State.Seen (Event.Id)
-        and then Event.Expected_Sequence /= State.Sequence + 1 =>
-          Result = Out_Of_Order
-          and then State = State'Old,
+        and then Event.Expected_Sequence /= State.Sequence + 1               =>
+          Result = Out_Of_Order and then State = State'Old,
 
-        others =>
+        others                                                               =>
           Result = Applied
           and then State.Sequence = State'Old.Sequence + 1
+          and then State.Seen = (State.Seen'Old with delta Event.Id => True)
+          and then State.Digest = Chain_Digest_For (State'Old.Digest, Event)
           and then
-            State.Seen =
-              (State.Seen'Old with delta Event.Id => True)
-          and then
-            State.Digest =
-              Chain_Digest_For (State'Old.Digest, Event));
+            State.History
+            = (State.History'Old
+               with delta History_Index (State'Old.Sequence + 1) => Event));
 
 end Sentinel_Ledger_Core;

@@ -1,3 +1,11 @@
 {
-    "sarif-viewer.connectToGithubCodeScanning": "off"
+    "sarif-viewer.connectToGithubCodeScanning": "off",
+
+    "[ada]": {
+        "editor.defaultFormatter": "AdaCore.ada",
+        "editor.formatOnSave": true,
+        "editor.detectIndentation": false,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 3
+    }
 }

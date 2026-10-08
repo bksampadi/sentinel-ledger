@@ -18,7 +18,9 @@ project Sentinel_Ledger is
 
       for Default_Switches ("Ada") use
         Sentinel_Ledger_Config.Ada_Compiler_Switches
-        & ("-gnat2022");
+        & ("-gnat2022",
+           "-gnatwa",
+           "-gnatwe");
 
    end Compiler;
 
@@ -34,5 +36,12 @@ project Sentinel_Ledger is
       for Artifacts (".") use ("share");
 
    end Install;
+
+   package Format is
+
+      for Indentation ("Ada") use "3";
+      for Indentation_Kind ("Ada") use "spaces";
+
+   end Format;
 
 end Sentinel_Ledger;
